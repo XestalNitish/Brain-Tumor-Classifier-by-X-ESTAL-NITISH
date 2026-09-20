@@ -14,7 +14,7 @@ from PIL import Image
 # Constants
 # ──────────────────────────────────────────────
 
-MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "brain_tumor_model.keras")
+MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "brain_tumor_model.onnx")
 
 CLASS_NAMES = ["Glioma", "Meningioma", "No Tumor", "Pituitary"]
 
@@ -71,19 +71,19 @@ CLASS_INFO = {
 @st.cache_resource(show_spinner="Loading AI model ...")
 def load_model():
     """
-    Load the trained Keras model (cached across reruns).
+    Load the trained ONNX model (cached across reruns).
 
-    Returns the model on success, or None on failure.
+    Returns the ONNX InferenceSession on success, or None on failure.
     """
     try:
-        import tensorflow as tf
+        import onnxruntime as ort
 
         if not os.path.exists(MODEL_PATH):
             st.error(f"Model file not found: {MODEL_PATH}")
             return None
 
-        model = tf.keras.models.load_model(MODEL_PATH)
-        return model
+        session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
+        return session
 
     except Exception as e:
         st.error(f"Failed to load model: {e}")
@@ -123,7 +123,7 @@ def preprocess_image(image: Image.Image) -> np.ndarray:
 
 def predict(model, image: Image.Image) -> dict:
     """
-    Run inference on a single image.
+    Run inference on a single image using ONNX Runtime.
 
     Returns
     -------
@@ -141,7 +141,10 @@ def predict(model, image: Image.Image) -> dict:
     """
     try:
         processed = preprocess_image(image)
-        predictions = model.predict(processed, verbose=0)[0]
+
+        # Get input name from the ONNX model
+        input_name = model.get_inputs()[0].name
+        predictions = model.run(None, {input_name: processed})[0][0]
 
         probabilities = {
             name: float(prob) for name, prob in zip(CLASS_NAMES, predictions)
