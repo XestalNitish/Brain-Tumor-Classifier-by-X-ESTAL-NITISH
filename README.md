@@ -38,7 +38,18 @@ Input (150x150x3)
  └── Dense(4, softmax) → [Glioma, Meningioma, No Tumor, Pituitary]
 ```
 
-**Total Parameters:** 776K (trainable: 258K)
+**Total Parameters:** 259K (trainable: 258.5K)  
+**Model Format:** ONNX Runtime (~1.0 MB optimized, high performance)
+
+### 📈 Model Evaluation & Accuracy (1,600 Test Scans)
+
+Evaluated on the Kaggle Brain Tumor MRI Benchmark Test Dataset:
+
+- **Overall Test Accuracy:** **92.00%** (1,472 / 1,600)
+- **Glioma:** 75.75% (303 / 400)
+- **Meningioma:** 93.75% (375 / 400)
+- **No Tumor:** 99.25% (397 / 400)
+- **Pituitary:** 99.25% (397 / 400)
 
 ---
 
@@ -82,14 +93,15 @@ The app will open at **http://localhost:8501**.
 brain-tumor-classifier/
 ├── app.py                      # Main Streamlit application
 ├── utils.py                    # Model loading, preprocessing, prediction
-├── brain_tumor_model.keras     # Trained CNN model (Git LFS)
+├── brain_tumor_model.onnx     # Production ONNX model (~1 MB)
+├── brain_tumor_model.keras    # Trained CNN model
 ├── requirements.txt            # Python dependencies
 ├── packages.txt                # System dependencies (Streamlit Cloud)
 ├── runtime.txt                 # Python version for Streamlit Cloud
 ├── .streamlit/
 │   └── config.toml             # Streamlit theme configuration
 ├── .gitignore
-├── .gitattributes              # Git LFS tracking rules
+├── .gitattributes              # Git tracking rules
 └── README.md
 ```
 
